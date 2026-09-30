@@ -1,16 +1,23 @@
-## Hi there 👋
+# Hi, I'm Seongtae Jang (mungiyo)
 
-<!--
-**mungiyo/mungiyo** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+Data Engineer building CDC/event streaming platforms and Airflow platforms on Kubernetes — declared as Helm charts and CRs, shipped via GitOps.  
+When open source gets in the way, I read the code, find the root cause, and send it upstream.
 
-Here are some ideas to get you started:
+- 🌐 Blog: [mungiyo.tistory.com](https://mungiyo.tistory.com/)
+- 📧 wkdtjdxo2@gmail.com
 
-- 🔭 I’m currently working on ...
-- 🌱 I’m currently learning ...
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
+## Open Source Contributions
+
+| Project | PR / Issue | Status | Summary |
+|---|---|---|---|
+| **apache/airflow** | [#73517](https://github.com/apache/airflow/pull/73517) | 🟡 In review | Add `S3RemoteLogIO.stream()` so S3 remote task logs are streamed instead of loaded whole. Peak heap for a 250 MB log read: 1,169 → 30 MiB. Fixes api-server OOM kills that also took down the Task Execution API. |
+| **astronomer/astronomer-cosmos** | [#2815](https://github.com/astronomer/astronomer-cosmos/pull/2815) | ✅ Merged | Atomic writes for the `partial_parse.msgpack` cache (`safe_copy` with file-mode preservation). Fixes a race where parallel dbt tasks sharing a cache dir silently fell back to a full parse. |
+| **datahub-project/datahub** | [#5918](https://github.com/datahub-project/datahub/issues/5918) | 🐛 Issue | Tableau ingestion failed on dataset names containing a comma — URN was split into 4 parts because the name wasn't encoded. |
+
+## What I work with
+
+**Streaming / CDC** Kafka · Kafka Connect (Strimzi) · Debezium · Iceberg Sink  
+**Batch / Lakehouse** Spark · dbt · Delta Lake · Iceberg  
+**Orchestration** Airflow · Astronomer Cosmos  
+**Infra / Delivery** Kubernetes (EKS) · Helm · ArgoCD · Terraform · KEDA  
+**Cloud** AWS · GCP (BigQuery) · Databricks (Unity Catalog)
