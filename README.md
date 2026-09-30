@@ -19,5 +19,5 @@ When open source gets in the way, I read the code, find the root cause, and send
 **Streaming / CDC** Kafka · Kafka Connect (Strimzi) · Debezium · Iceberg Sink  
 **Batch / Lakehouse** Spark · dbt · Delta Lake · Iceberg  
 **Orchestration** Airflow · Astronomer Cosmos  
-**Infra / Delivery** Kubernetes (EKS) · Helm · ArgoCD · Terraform · KEDA  
+**Infra / Delivery** Kubernetes (EKS) · Helm · Terraform  
 **Cloud** AWS · GCP (BigQuery) · Databricks (Unity Catalog)
