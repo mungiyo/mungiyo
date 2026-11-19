@@ -25,7 +25,7 @@ PAL = {
 }
 ICONS = {
     "postgres": "postgresql.svg", "kafka": "apachekafka.svg", "spark": "apachespark.svg",
-    "flink": "apacheflink.svg", "airflow": "apacheairflow.svg", "databricks": "databricks.svg",
+    "flink": "apacheflink.svg", "airflow": "apacheairflow-color.svg", "databricks": "databricks.svg",
     "delta": "delta.svg", "k8s": "kubernetes.svg", "argo": "argo.svg", "gha": "githubactions.svg",
     "github": "github.svg", "git": "git.svg", "helm": "helm.svg", "docker": "docker.svg",
     "debezium": "debezium.png", "dbt": "dbt-labs.png", "aws": "aws.png", "slack": "slackhq.png",
