@@ -23,7 +23,19 @@ The numbers on the diagram match the sections below.
 </details>
 
 <details>
-<summary><b>2 · feach</b> — feature store: pipelines write, one API reads</summary>
+<summary><b>2 · Ingestion template</b> — every batch source lands the same way</summary>
+<br>
+
+![Ingestion template](diagrams/ingestion.svg)
+
+- Every non-CDC source — 3rd-party APIs, files, external storage — goes through one template: S3 landing → Bronze → Validate → Silver. Adding a source is a new template instance, not a new pipeline.
+- Landing files are never overwritten and Bronze keeps every column as STRING, so Silver can always be rebuilt from what was received.
+- Write-Audit-Publish: each batch is typed, deduplicated and checked in a stage table first. Only a passing batch is published — a range replace by default, or a key MERGE inside a transaction. A failing batch is quarantined and Silver is left untouched.
+
+</details>
+
+<details>
+<summary><b>3 · feach</b> — feature store: pipelines write, one API reads</summary>
 <br>
 
 ![feach feature store](diagrams/feach.svg)
@@ -35,7 +47,7 @@ The numbers on the diagram match the sections below.
 </details>
 
 <details>
-<summary><b>3 · dbt CI/CD</b> — one commit SHA names both the image and the DAG graph</summary>
+<summary><b>4 · dbt CI/CD</b> — one commit SHA names both the image and the DAG graph</summary>
 <br>
 
 ![dbt CI/CD](diagrams/dbt-cicd.svg)
@@ -48,7 +60,7 @@ The numbers on the diagram match the sections below.
 </details>
 
 <details>
-<summary><b>4 · Airflow CI/CD</b> — the image is promoted, DAGs are pulled</summary>
+<summary><b>5 · Airflow CI/CD</b> — the image is promoted, DAGs are pulled</summary>
 <br>
 
 ![Airflow CI/CD](diagrams/airflow-cicd.svg)
