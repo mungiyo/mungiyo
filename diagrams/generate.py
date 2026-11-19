@@ -224,10 +224,10 @@ d.edge(topic, alert, ex=R, en=L)
 d.edge(alert, slack, ex=R, en=L)
 d.save("cdc-pipeline.drawio")
 
-# ---------------------------------------------------------------- 2. Ingestion template
-d = D("Ingestion template")
-d.text(30, 20, 900, 30, "2 · Ingestion template — every batch source lands the same way", 18, "#111111", True, "left")
-d.text(30, 50, 1000, 18, "Write-Audit-Publish: only batches that pass validation reach Silver · one source = one template instance",
+# ---------------------------------------------------------------- 2. Ingestion pipeline
+d = D("Ingestion pipeline")
+d.text(30, 20, 900, 30, "2 · Ingestion pipeline — every batch source lands the same way", 18, "#111111", True, "left")
+d.text(30, 50, 1000, 18, "Write-Audit-Publish: only batches that pass validation reach Silver · one source = one pipeline instance",
        11, "#555555", False, "left")
 WI, SI = 196, 262
 XI = [30 + SI * i for i in range(5)]
@@ -274,7 +274,7 @@ d.edge(n_stg, fail, ex=B, en=T, color="#b85450")
 d.edge(n_slv, down, dashed=True, ex=B, en=T, color="#82b366")
 GX1 = XI[4] + WI
 TW = (GX1 - 30 - 40) / 3
-d.group(16, 556, GX1 - 2, 100, "Provided by the template", "plain")
+d.group(16, 556, GX1 - 2, 100, "Shared by every pipeline instance", "plain")
 orch = d.node(30, 590, "Orchestration — Airflow", "one DAG per source: land → bronze → validate → silver",
               "orch", w=TW, h=52, icon="airflow")
 gov = d.node(30 + TW + 20, 590, "Governance — Unity Catalog", "permissions · lineage · raw_<source>__<schema>",

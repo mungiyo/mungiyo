@@ -21,12 +21,12 @@ The numbers on the diagram match the sections below.
 </details>
 
 <details>
-<summary><b>2 · Ingestion template</b> — every batch source lands the same way</summary>
+<summary><b>2 · Ingestion pipeline</b> — every batch source lands the same way</summary>
 <br>
 
-![Ingestion template](diagrams/ingestion.svg)
+![Ingestion pipeline](diagrams/ingestion.svg)
 
-- Every non-CDC source — 3rd-party APIs, files, external storage — goes through one template: S3 landing → Bronze → Validate → Silver. Adding a source is a new template instance, not a new pipeline.
+- Every non-CDC source — 3rd-party APIs, files, external storage — goes through the same pipeline: S3 landing → Bronze → Validate → Silver. Adding a source is a new instance of it, not new code.
 - Landing files are never overwritten and Bronze keeps every column as STRING, so Silver can always be rebuilt from what was received.
 - Write-Audit-Publish: each batch is typed, deduplicated and checked in a stage table first. Only a passing batch is published — a range replace by default, or a key MERGE inside a transaction. A failing batch is quarantined and Silver is left untouched.
 
