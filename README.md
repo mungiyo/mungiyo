@@ -2,8 +2,6 @@
 
 **Data Engineer** — I build and run data platforms: CDC ingestion on Kafka, orchestration on Airflow, and serving on a lakehouse.
 
-[Blog](https://mungiyo.tistory.com/)
-
 ## What I build
 
 ![Data platform overview](diagrams/overview.svg)
