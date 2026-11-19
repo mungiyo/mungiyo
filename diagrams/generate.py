@@ -359,7 +359,7 @@ d.save("dbt-cicd.drawio")
 # ---------------------------------------------------------------- 5. Workflow platform
 d = D("Workflow platform")
 d.text(30, 20, 1000, 30, "5 · Workflow platform — many ways in, one Airflow runtime", 18, "#111111", True, "left")
-d.text(30, 50, 1240, 18, "Engineers, a self-service portal, dbt and AI agents all create workflows; "
+d.text(30, 50, 1240, 18, "Engineers, a self-service portal and dbt all create workflows; "
        "the platform layer gives every DAG the same policy, secrets, alerts and lineage", 11, "#555555", False, "left")
 WP = 210
 AX, BX = 30, 290
@@ -368,17 +368,16 @@ DX = 1060
 GT, GH = 84, 506
 d.group(AX - 14, GT, WP + 28, GH, "Ways in", "plain")
 d.group(BX - 14, GT, WP + 28, GH, "Delivery", "orch")
-crt = d.group(C1 - 15, GT, C2 + WP + 15 - (C1 - 15), GH, "Runtime · Airflow 3.1 on Kubernetes", "lake")
+crt = d.group(C1 - 15, GT, C2 + WP + 15 - (C1 - 15), GH, "Runtime · Airflow 3 on Kubernetes", "lake")
 drun = d.group(DX - 14, GT, WP + 28, GH, "Tasks run on", "proc")
 rows = [120, 215, 310, 405, 500]
 pr = d.node(AX, rows[0] + 7, "DAG pull request", "hand-written DAGs\ndomain packages", "plain", w=WP, h=70, icon="github")
 portal = d.node(AX, rows[1] + 7, "Self-service portal", "sheet export / import specs\none DAG per spec, paused", "plain", w=WP, h=70)
 dbtm = d.node(AX, rows[2] + 7, "dbt project", "one DAG file per unit\ngraph from the manifest", "plain", w=WP, h=70, icon="dbt")
-mcp = d.node(AX, rows[3] + 7, "AI agents · MCP", "Okta token → own Airflow\ntoken · prod read-only", "plain", w=WP, h=70)
-ppr = d.node(AX, rows[4] + 7, "Platform pull request", "image · config · plugins", "plain", w=WP, h=70, icon="github")
+ppr = d.node(AX, rows[3] + 7, "Platform pull request", "image · config · plugins", "plain", w=WP, h=70, icon="github")
 gsync = d.node(BX, rows[0] + 7, "git-sync sidecar", "main → every pod\nin about a minute", "proc", w=WP, h=70, icon="git")
 s3 = d.node(BX, rows[1] + 7, "S3", "specs · dbt manifest\nread at parse time", "plain", w=WP, h=70, icon="aws")
-rel = d.node(BX, rows[4] + 7, "Image release", "release-please → ECR\nGitOps tag → ArgoCD", "orch", w=WP, h=70, icon="argo")
+rel = d.node(BX, rows[3] + 7, "Image release", "release-please → ECR\nGitOps tag → ArgoCD", "orch", w=WP, h=70, icon="argo")
 ctrl = d.node(C1, 113, "Control plane", "Scheduler · DAG processor\nTriggerer · API server\nOkta SSO · dev / stg / prod",
               "orch", w=WP, h=165, icon="airflow")
 kx = d.node(C2, rows[0] + 7, "Kubernetes executor", "one pod per task\nimage set by policy", "plain", w=WP, h=70, icon="k8s")
@@ -404,9 +403,8 @@ d.edge(portal, s3, "spec", ex=R, en=L)
 d.edge(dbtm, s3, "manifest", ex=R, en=(0, 0.75))
 d.edge(gsync, ctrl, ex=R, en=(0, 42 / 165))
 d.edge(s3, ctrl, ex=R, en=(0, 137 / 165))
-d.edge(mcp, ctrl, "REST API", ex=R, en=(0, 155 / 165), pts=[(525, 440), (525, 268)])
 d.edge(ppr, rel, ex=R, en=L)
-d.edge(rel, crt, "roll out", ex=R, en=(0, 0.89))
+d.edge(rel, crt, "roll out", ex=R, en=(0, (440 - GT) / GH))
 d.edge(ctrl, kx, ex=(1, 42 / 165), en=L)
 d.edge(ctrl, cel, ex=(1, 137 / 165), en=L)
 d.edge(crt, drun, "tasks", ex=R, en=L)

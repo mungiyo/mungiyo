@@ -63,7 +63,7 @@ The numbers on the diagram match the sections below.
 
 ![Workflow platform](diagrams/workflow-platform.svg)
 
-- Workflows come in four ways: hand-written DAGs merged to one repo, specs a self-service portal writes to S3 (one DAG per spec, e.g. Databricks → Google Sheets), dbt DAG files rendered from the manifest, and AI agents through an Airflow MCP that swaps the person's Okta token for their own Airflow token.
+- Workflows come in three ways: hand-written DAGs merged to one repo, specs a self-service portal writes to S3 (one DAG per spec, e.g. Databricks → Google Sheets), and dbt DAG files rendered from the manifest.
 - Every DAG gets the same platform layer without asking: a cluster policy (timeouts, environment tags, pools, Slack failure alerts), shared operators, secrets from SSM Parameter Store, and XCom and task logs on S3.
 - Delivery stays split. The platform image is versioned by release-please and promoted per environment through GitOps and ArgoCD; DAGs are pulled by a git-sync sidecar in every pod and are live in about a minute.
 - Tables are Airflow Assets, so DAGs schedule on data and their lineage flows into OpenMetadata.
