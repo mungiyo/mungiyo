@@ -25,7 +25,7 @@ PAL = {
 }
 ICONS = {
     "postgres": "postgresql.svg", "kafka": "apachekafka.svg", "spark": "apachespark.svg",
-    "flink": "apacheflink.svg", "airflow": "apacheairflow.svg", "databricks": "databricks.svg",
+    "flink": "apacheflink.svg", "airflow": "apacheairflow-color.svg", "databricks": "databricks.svg",
     "delta": "delta.svg", "k8s": "kubernetes.svg", "argo": "argo.svg", "gha": "githubactions.svg",
     "github": "github.svg", "git": "git.svg", "helm": "helm.svg", "docker": "docker.svg",
     "debezium": "debezium.png", "dbt": "dbt-labs.png", "aws": "aws.png", "slack": "slackhq.png",
@@ -356,37 +356,66 @@ d.edge(pod, dbx, ex=R, en=L)
 d.edge(ptr, om, dashed=True, ex=(0.75, 1), en=(0.75, 0))
 d.save("dbt-cicd.drawio")
 
-# ---------------------------------------------------------------- 4. Airflow CI/CD
-d = D("Airflow CI/CD")
-d.text(30, 20, 900, 30, "5 · Airflow CI/CD — the image is promoted, DAGs are pulled", 18, "#111111", True, "left")
-XA = [50 + STEP * i for i in range(4)]
-GW = XA[3] + W + 20 - 30
-CX = 30 + GW + 20
-d.group(30, 70, GW, 250, "Platform image · Airflow + shared operator package", "orch")
-d.group(30, 340, GW, 130, "DAGs", "proc")
-d.group(CX, 70, W + 30, 400, "Airflow on Kubernetes\ndev · stg · prod", "lake")
-ipr = d.node(XA[0], 110, "Pull request", "", "plain", icon="github")
-ici = d.node(XA[1], 110, "CI", "lint · lock check\nbuild image, pytest inside", "ci", h=70, icon="gha")
-irel = d.node(XA[2], 110, "release-please", "release PR → version tag", "orch", icon="github")
-iecr = d.node(XA[3], 110, "ECR image", "vX.Y.Z-sha · immutable", "plain", icon="aws")
-dep = d.node(XA[1], 235, "Deploy workflow", "manual · per-env approval", "ci", icon="gha")
-gop = d.node(XA[2], 235, "GitOps repo", "image tag in Helm values", "plain", icon="helm")
-argo = d.node(XA[3], 235, "ArgoCD", "sync", "orch", icon="argo")
-dpr = d.node(XA[0], 385, "Pull request", "", "plain", icon="github")
-dci = d.node(XA[1], 385, "CI", "lint · DAG import tests\ninside the runtime image", "ci", h=70, icon="gha")
-dmain = d.node(XA[2], 385, "main branch", "single branch, all envs", "plain", icon="git")
-gs = d.node(XA[3], 385, "git-sync sidecar", "in every pod · 60 s", "proc", icon="git")
-sched = d.node(CX + 15, 150, "Scheduler", "Kubernetes executor", "plain", icon="k8s")
-dagp = d.node(CX + 15, 385, "DAG processor", "task pods", "plain", icon="airflow")
-d.edge(ipr, ici, ex=R, en=L)
-d.edge(ici, irel, "merge", ex=R, en=L)
-d.edge(irel, iecr, "push", ex=R, en=L)
-d.edge(iecr, dep, "pick a version", dashed=True, ex=B, en=T, pts=[(XA[3] + H, 205), (XA[1] + H, 205)])
-d.edge(dep, gop, "bump", ex=R, en=L)
-d.edge(gop, argo, ex=R, en=L)
-d.edge(argo, sched, "roll out", ex=R, en=B, pts=[(CX + 15 + H, 263)])
-d.edge(dpr, dci, ex=R, en=L)
-d.edge(dci, dmain, "merge", ex=R, en=L)
-d.edge(dmain, gs, "pull", ex=R, en=L)
-d.edge(gs, dagp, ex=R, en=L)
-d.save("airflow-cicd.drawio")
+# ---------------------------------------------------------------- 5. Workflow platform
+d = D("Workflow platform")
+d.text(30, 20, 1000, 30, "5 · Workflow platform — many ways in, one Airflow runtime", 18, "#111111", True, "left")
+d.text(30, 50, 1240, 18, "Engineers, a self-service portal and dbt all create workflows; "
+       "the platform layer gives every DAG the same policy, secrets, alerts and lineage", 11, "#555555", False, "left")
+WP = 210
+AX, BX = 30, 290
+C1, C2 = 555, 790
+DX = 1060
+GT, GH = 84, 506
+d.group(AX - 14, GT, WP + 28, GH, "Ways in", "plain")
+d.group(BX - 14, GT, WP + 28, GH, "Delivery", "orch")
+crt = d.group(C1 - 15, GT, C2 + WP + 15 - (C1 - 15), GH, "Runtime · Airflow 3 on Kubernetes", "lake")
+drun = d.group(DX - 14, GT, WP + 28, GH, "Tasks run on", "proc")
+rows = [120, 215, 310, 405, 500]
+pr = d.node(AX, rows[0] + 7, "DAG pull request", "hand-written DAGs\ndomain packages", "plain", w=WP, h=70, icon="github")
+portal = d.node(AX, rows[1] + 7, "Self-service portal", "sheet export / import specs\none DAG per spec, paused", "plain", w=WP, h=70)
+dbtm = d.node(AX, rows[2] + 7, "dbt project", "one DAG file per unit\ngraph from the manifest", "plain", w=WP, h=70, icon="dbt")
+ppr = d.node(AX, rows[3] + 7, "Platform pull request", "image · config · plugins", "plain", w=WP, h=70, icon="github")
+gsync = d.node(BX, rows[0] + 7, "git-sync sidecar", "main → every pod\nin about a minute", "proc", w=WP, h=70, icon="git")
+s3 = d.node(BX, rows[1] + 7, "S3", "specs · dbt manifest\nread at parse time", "plain", w=WP, h=70, icon="aws")
+rel = d.node(BX, rows[3] + 7, "Image release", "release-please → ECR\nGitOps tag → ArgoCD", "orch", w=WP, h=70, icon="argo")
+ctrl = d.node(C1, 113, "Control plane", "Scheduler · DAG processor\nTriggerer · API server\nOkta SSO · dev / stg / prod",
+              "orch", w=WP, h=165, icon="airflow")
+kx = d.node(C2, rows[0] + 7, "Kubernetes executor", "one pod per task\nimage set by policy", "plain", w=WP, h=70, icon="k8s")
+cel = d.node(C2, rows[1] + 7, "Celery workers", "KEDA 0–4\ndeferrable dbt sensors", "plain", w=WP, h=70)
+d.group(C1 - 7, 300, C2 + WP + 7 - (C1 - 7), 280, "Platform layer — every DAG gets it", "plain")
+pol = d.node(C1, 340, "Cluster policy", "timeouts · env tags · pools\nSlack failure callback", "orch", w=WP, h=70, icon="airflow")
+ops = d.node(C2, 340, "Shared operators", "Spark Connect · Databricks\n→ Postgres · SaaS APIs", "orch", w=WP, h=70, icon="spark")
+sec = d.node(C1, 430, "Secrets", "SSM Parameter Store\nconnections · variables", "plain", w=WP, h=70, icon="aws")
+xcl = d.node(C2, 430, "XCom & task logs", "both on S3\nstreaming log reader", "plain", w=WP, h=70, icon="aws")
+pls = d.node(C1, 520, "Pools", "per-source concurrency\nlimits", "plain", w=WP, h=70)
+ast = d.node(C2, 520, "Assets", "one per table\ndata-aware schedules", "plain", w=WP, h=70)
+run = [
+    ("Databricks SQL", "warehouse · dbt sources", "databricks"),
+    ("Spark Connect", "shared Spark server", "spark"),
+    ("Kubernetes pods", "dbt · OpenMetadata ingestion", "k8s"),
+    ("PostgreSQL", "feature store sync", "postgres"),
+    ("SaaS · Google", "Sheets · BigQuery · ad APIs", None),
+]
+for y, (t, sub, ic) in zip(rows, run):
+    d.node(DX, y + 7, t, sub, "plain", w=WP, h=70, icon=ic)
+d.edge(pr, gsync, "merge", ex=R, en=L)
+d.edge(portal, s3, "spec", ex=R, en=L)
+d.edge(dbtm, s3, "manifest", ex=R, en=(0, 0.75))
+d.edge(gsync, ctrl, ex=R, en=(0, 42 / 165))
+d.edge(s3, ctrl, ex=R, en=(0, 137 / 165))
+d.edge(ppr, rel, ex=R, en=L)
+d.edge(rel, crt, "roll out", ex=R, en=(0, (440 - GT) / GH))
+d.edge(ctrl, kx, ex=(1, 42 / 165), en=L)
+d.edge(ctrl, cel, ex=(1, 137 / 165), en=L)
+d.edge(crt, drun, "tasks", ex=R, en=L)
+d.group(16, 610, DX + WP + 14 - 16, 100, "Observe & govern", "plain")
+OW = (DX + WP - 30 - 60) / 4
+obs = [
+    ("Okta SSO", "FAB roles from Okta groups", None),
+    ("Slack alerts", "failures · dbt test warnings", "slack"),
+    ("OpenMetadata lineage", "Assets · specs → DAG lineage", "om"),
+    ("dbt Docs", "served by the API server", "dbt"),
+]
+for i, (t, sub, ic) in enumerate(obs):
+    d.node(30 + i * (OW + 20), 644, t, sub, "plain", w=OW, h=52, icon=ic)
+d.save("workflow-platform.drawio")

@@ -58,15 +58,16 @@ The numbers on the diagram match the sections below.
 </details>
 
 <details>
-<summary><b>5 · Airflow CI/CD</b> — the image is promoted, DAGs are pulled</summary>
+<summary><b>5 · Workflow platform</b> — many ways in, one Airflow runtime</summary>
 <br>
 
-![Airflow CI/CD](diagrams/airflow-cicd.svg)
+![Workflow platform](diagrams/workflow-platform.svg)
 
-- The platform image is versioned by release-please and promoted per environment through a GitOps tag bump and ArgoCD.
-- DAGs skip all of that: every pod pulls `main` with a git-sync sidecar, so a DAG change is live in about a minute.
-- DAG import tests run inside the real runtime image.
-- Related: [apache/airflow#73517](https://github.com/apache/airflow/pull/73517)
+- Workflows come in three ways: hand-written DAGs merged to one repo, specs a self-service portal writes to S3 (one DAG per spec, e.g. Databricks → Google Sheets), and dbt DAG files rendered from the manifest.
+- Every DAG gets the same platform layer without asking: a cluster policy (timeouts, environment tags, pools, Slack failure alerts), shared operators, secrets from SSM Parameter Store, and XCom and task logs on S3.
+- Delivery stays split. The platform image is versioned by release-please and promoted per environment through GitOps and ArgoCD; DAGs are pulled by a git-sync sidecar in every pod and are live in about a minute.
+- Tables are Airflow Assets, so DAGs schedule on data and their lineage flows into OpenMetadata.
+- Related: [apache/airflow#73517](https://github.com/apache/airflow/pull/73517) — the streaming S3 task-log reader
 
 </details>
 
