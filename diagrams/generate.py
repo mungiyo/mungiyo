@@ -96,9 +96,22 @@ class D:
         st = f"ellipse;{FONT}fillColor=#1f2937;strokeColor=#1f2937;fontColor=#ffffff;fontStyle=1;fontSize=12;aspect=fixed;"
         return self._v(str(n), st, x, y, 24, 24)
 
-    def edge(self, s, t, label="", dashed=False, ex=None, en=None, pts=None):
+    def note(self, x, y, w, h, sections):
+        """Dashed box holding (heading, [lines]) sections, left-aligned."""
+        box = self._v("", "rounded=1;arcSize=4;fillColor=#ffffff;strokeColor=#bbbbbb;dashed=1;", x, y, w, h)
+        cy = y + 10
+        for head, lines in sections:
+            self._v(head, f"text;{FONT}fontSize=11;fontStyle=1;fontColor=#222222;align=left;verticalAlign=top;"
+                          f"strokeColor=none;fillColor=none;spacing=0;", x + 12, cy, w - 20, 14)
+            cy += 16
+            self._v("\n".join(lines), f"text;{FONT}fontSize=10;fontColor=#444444;align=left;verticalAlign=top;"
+                                      f"strokeColor=none;fillColor=none;spacing=0;", x + 12, cy, w - 20, 13 * len(lines) + 2)
+            cy += 13 * len(lines) + 9
+        return box
+
+    def edge(self, s, t, label="", dashed=False, ex=None, en=None, pts=None, color="#555555"):
         i = self._id()
-        st = (f"edgeStyle=orthogonalEdgeStyle;rounded=1;{FONT}endArrow=block;endFill=1;strokeColor=#555555;"
+        st = (f"edgeStyle=orthogonalEdgeStyle;rounded=1;{FONT}endArrow=block;endFill=1;strokeColor={color};"
               f"strokeWidth=1.3;fontSize=10;fontColor=#333333;labelBackgroundColor=#ffffff;")
         if dashed:
             st += "dashed=1;"
@@ -131,20 +144,30 @@ H = W / 2
 # ---------------------------------------------------------------- overview
 d = D("Data platform overview")
 d.text(30, 20, 700, 30, "Data platform — from service databases to serving", 18, "#111111", True, "left")
-for x, t in zip(X, ["Sources", "Capture", "Stream", "Process", "Lakehouse", "Serve"]):
+for x, t in zip(X, ["Sources", "Capture", "Land · Stream", "Process", "Lakehouse", "Serve"]):
     d.text(x, 62, W, 20, t.upper(), 10, "#888888", True)
-db = d.node(X[0], 100, "Service DBs", "Postgres · MySQL · DocDB", "src", icon="postgres")
-ev = d.node(X[0], 340, "App events", "event logs", "src")
-dbz = d.node(X[1], 100, "Debezium", "Kafka Connect · custom SMT", "ingest", icon="debezium")
-kafka = d.node(X[2], 100, "Kafka", "", "ingest", h=296)
-d.icon(X[2] + H - 18, 198, "kafka", 36)
-spark = d.node(X[3], 100, "Spark on Kubernetes", "CDC MERGE every 10 min", "proc", icon="spark")
-flink = d.node(X[3], 340, "Flink", "real-time feature jobs", "proc", icon="flink")
-raw = d.node(X[4], 100, "Raw replicas", "Delta · Unity Catalog", "lake", icon="databricks")
-dw = d.node(X[4], 220, "dbt warehouse", "staging → core → mart", "lake", icon="dbt")
-svc = d.node(X[5], 100, "Product services", "CRM · apps", "src")
-feach = d.node(X[5], 220, "feach", "feature lookup API", "serve")
-pg = d.node(X[5], 340, "Online store", "PostgreSQL", "serve", icon="postgres")
+# batch ingestion row
+files = d.node(X[0], 100, "APIs · files", "3rd-party systems · storage", "src")
+land = d.node(X[1], 100, "S3 landing", "original format · immutable", "ingest", icon="aws")
+bronze = d.node(X[2], 100, "Bronze", "Auto Loader · append-only", "lake", icon="databricks")
+valid = d.node(X[3], 100, "Validate", "stage checks · then publish", "proc", icon="databricks")
+# CDC and event rows
+db = d.node(X[0], 220, "Service DBs", "Postgres · MySQL · DocDB", "src", icon="postgres")
+ev = d.node(X[0], 460, "App events", "event logs", "src")
+dbz = d.node(X[1], 220, "Debezium", "Kafka Connect · custom SMT", "ingest", icon="debezium")
+kafka = d.node(X[2], 220, "Kafka", "", "ingest", h=296)
+d.icon(X[2] + H - 18, 318, "kafka", 36)
+spark = d.node(X[3], 220, "Spark on Kubernetes", "CDC MERGE every 10 min", "proc", icon="spark")
+flink = d.node(X[3], 460, "Flink", "real-time feature jobs", "proc", icon="flink")
+raw = d.node(X[4], 220, "Raw layer", "CDC replicas · ingested Silver", "lake", icon="databricks")
+dw = d.node(X[4], 340, "dbt warehouse", "staging → core → mart", "lake", icon="dbt")
+svc = d.node(X[5], 220, "Product services", "CRM · apps", "src")
+feach = d.node(X[5], 340, "feach", "feature lookup API", "serve")
+pg = d.node(X[5], 460, "Online store", "PostgreSQL", "serve", icon="postgres")
+d.edge(files, land, ex=R, en=L)
+d.edge(land, bronze, ex=R, en=L)
+d.edge(bronze, valid, ex=R, en=L)
+d.edge(valid, raw, ex=R, en=T, pts=[(X[4] + H, 128)])
 d.edge(db, dbz, ex=R, en=L)
 d.edge(dbz, kafka, ex=R, en=(0, 0.095))
 d.edge(ev, kafka, ex=R, en=(0, 0.905))
@@ -152,23 +175,24 @@ d.edge(kafka, spark, ex=(1, 0.095), en=L)
 d.edge(kafka, flink, ex=(1, 0.905), en=L)
 d.edge(spark, raw, ex=R, en=L)
 d.edge(raw, dw, ex=B, en=T)
-d.edge(dw, pg, ex=B, en=(0, 0.25), pts=[(X[4] + H, 354)])
+d.edge(dw, pg, ex=B, en=(0, 0.25), pts=[(X[4] + H, 474)])
 d.edge(flink, pg, ex=(1, 0.75), en=(0, 0.75))
-d.text(X[4] + H + 8, 288, 110, 30, "batch sync\nchanged rows only", 10, "#333333", False, "left")
-d.text(X[3] + W + 30, 386, 110, 16, "real-time upsert", 10, "#333333", False, "left")
+d.text(X[4] + H + 8, 408, 110, 30, "batch sync\nchanged rows only", 10, "#333333", False, "left")
+d.text(X[3] + W + 30, 506, 110, 16, "real-time upsert", 10, "#333333", False, "left")
 d.edge(pg, feach, ex=T, en=B)
 d.edge(feach, svc, ex=T, en=B)
 band = X[5] + W - X[1]
-d.node(X[1], 440, "Airflow 3 on Kubernetes", "schedules CDC merge · dbt runs · feature sync", "orch", w=band, h=52)
-d.icon(X[1] + 44, 453, "airflow")
-d.icon(X[1] + 78, 453, "k8s")
-d.node(X[1], 506, "CI/CD", "GitHub Actions → ECR · S3 → ArgoCD · git-sync", "ci", w=band, h=52)
-d.icon(X[1] + 44, 519, "gha")
-d.icon(X[1] + 78, 519, "argo")
-d.badge(X[3] - 10, 90, 1)
-d.badge(X[5] - 10, 210, 2)
-d.badge(X[4] - 10, 210, 3)
-d.badge(X[1] - 10, 430, 4)
+d.node(X[1], 560, "Airflow 3 on Kubernetes", "schedules ingestion · CDC merge · dbt runs · feature sync", "orch", w=band, h=52)
+d.icon(X[1] + 44, 573, "airflow")
+d.icon(X[1] + 78, 573, "k8s")
+d.node(X[1], 626, "CI/CD", "GitHub Actions → ECR · S3 → ArgoCD · git-sync", "ci", w=band, h=52)
+d.icon(X[1] + 44, 639, "gha")
+d.icon(X[1] + 78, 639, "argo")
+d.badge(X[3] - 10, 210, 1)
+d.badge(X[1] - 10, 90, 2)
+d.badge(X[5] - 10, 330, 3)
+d.badge(X[4] - 10, 330, 4)
+d.badge(X[1] - 10, 550, 5)
 d.save("overview.drawio")
 
 # ---------------------------------------------------------------- 1. CDC
@@ -197,9 +221,68 @@ d.edge(topic, alert, ex=R, en=L)
 d.edge(alert, slack, ex=R, en=L)
 d.save("cdc-pipeline.drawio")
 
-# ---------------------------------------------------------------- 2. feach
+# ---------------------------------------------------------------- 2. Ingestion template
+d = D("Ingestion template")
+d.text(30, 20, 900, 30, "2 · Ingestion template — every batch source lands the same way", 18, "#111111", True, "left")
+d.text(30, 50, 1000, 18, "Write-Audit-Publish: only batches that pass validation reach Silver · one source = one template instance",
+       11, "#555555", False, "left")
+WI, SI = 196, 262
+XI = [30 + SI * i for i in range(5)]
+stages = [("Source", "src"), ("S3 landing", "ingest"), ("Bronze", "lake"), ("Validate", "proc"), ("Silver", "lake")]
+for x, (t, k) in zip(XI, stages):
+    d.group(x - 14, 84, WI + 28, 452, t, k)
+src = d.node(XI[0], 129, "Source system", "RDBMS · API · file · event\none source = one instance", "src", w=WI, h=70)
+s3 = d.node(XI[1], 129, "S3 landing zone", "original format · immutable\ndate partitions", "ingest", w=WI, h=70, icon="aws")
+brz = d.node(XI[2], 129, "Bronze", "b_<table> · Delta\nappend-only · all STRING", "lake", w=WI, h=70, icon="databricks")
+stg = d.node(XI[3], 129, "Validate", "s_<table>__stage\ntyped · deduped · checked", "proc", w=WI, h=70, icon="databricks")
+slv = d.node(XI[4], 129, "Silver", "s_<table> · Delta\nPK = business grain", "lake", w=WI, h=70, icon="databricks")
+NY, NH = 212, 214
+n_src = d.note(XI[0], NY, WI, NH, [
+    ("Extract modes", ["• Full snapshot", "• Incremental (watermark)", "• CDC (Debezium)",
+                       "• 3rd-party system API", "• External storage (GCS)"])])
+n_s3 = d.note(XI[1], NY, WI, NH, [
+    ("Path", ["s3://<bucket>/landing/", "  <source>/<schema>/<table>/", "  dt=YYYY-MM-DD/"]),
+    ("Rules", ["• Original format, as received", "• Never overwritten — the", "  source for replays",
+               "• Retention by lifecycle rules", "• Read via UC external location"])])
+n_brz = d.note(XI[2], NY, WI, NH, [
+    ("Load", ["• Auto Loader (cloudFiles)", "• New files only, checkpointed", "• Every column as STRING —",
+              "  no type inference"]),
+    ("Meta columns", ["• _ingested_at · _source_file", "• _batch_id"])])
+n_stg = d.note(XI[3], NY, WI, NH, [
+    ("Prepare — this batch only", ["• Cast STRING → target types", "• Standardise column names",
+                                    "• Keep latest row per grain"]),
+    ("Checks", ["• Schema: casts, expected cols", "• Unique: one row per grain", "• Not null: PK, required cols",
+                "• Row count: Bronze vs stage"]),
+    ("Defaults", ["• '__unknown__' · -1 · 1900-01-01"])])
+n_slv = d.note(XI[4], NY, WI, NH, [
+    ("Publish", ["• Range replace (default):", "  REPLACE WHERE … FROM stage", "• Key MERGE: in a transaction,",
+                 "  checked before COMMIT"]),
+    ("Grain · PK", ["• One row = one business entity", "• PK NOT NULL + UC primary key"]),
+    ("Principle", ["• Always rebuildable from Bronze"])])
+fail = d.node(XI[3], 461, "Fail", "quarantine · Slack alert\nSilver left untouched", "ci", w=WI, h=70, icon="slack")
+down = d.node(XI[4], 461, "Downstream", "dbt warehouse models", "lake", w=WI, h=70, icon="dbt")
+d.edge(src, s3, "extract", ex=R, en=L)
+d.edge(s3, brz, "Auto Loader", ex=R, en=L)
+d.edge(brz, stg, "stage", ex=R, en=L)
+d.edge(stg, slv, "publish", ex=R, en=L)
+for a, b in [(src, n_src), (s3, n_s3), (brz, n_brz), (stg, n_stg), (slv, n_slv)]:
+    d.edge(a, b, dashed=True, ex=B, en=T, color="#999999")
+d.edge(n_stg, fail, ex=B, en=T, color="#b85450")
+d.edge(n_slv, down, dashed=True, ex=B, en=T, color="#82b366")
+GX1 = XI[4] + WI
+TW = (GX1 - 30 - 40) / 3
+d.group(16, 556, GX1 - 2, 100, "Provided by the template", "plain")
+orch = d.node(30, 590, "Orchestration — Airflow", "one DAG per source: land → bronze → validate → silver",
+              "orch", w=TW, h=52, icon="airflow")
+gov = d.node(30 + TW + 20, 590, "Governance — Unity Catalog", "permissions · lineage · raw_<source>__<schema>",
+             "lake", w=TW, h=52, icon="databricks")
+obs = d.node(30 + 2 * (TW + 20), 590, "Observability", "run log · check results · Slack on failure",
+             "plain", w=TW, h=52, icon="slack")
+d.save("ingestion.drawio")
+
+# ---------------------------------------------------------------- 3. feach
 d = D("feach feature store")
-d.text(30, 20, 800, 30, "2 · feach — feature store: pipelines write, one API reads", 18, "#111111", True, "left")
+d.text(30, 20, 800, 30, "3 · feach — feature store: pipelines write, one API reads", 18, "#111111", True, "left")
 XF = [30, 262, 510, 776, 1008]
 mart = d.node(XF[0], 100, "dbt feature mart", "Databricks · hourly", "lake", icon="dbt")
 sync = d.node(XF[1], 100, "Airflow batch sync", "diff two Delta versions\n→ upsert changed rows", "orch", h=70, icon="airflow")
@@ -234,7 +317,7 @@ d.save("feach.drawio")
 
 # ---------------------------------------------------------------- 3. dbt CI/CD
 d = D("dbt CI/CD")
-d.text(30, 20, 900, 30, "3 · dbt CI/CD — one commit SHA names both the image and the DAG graph", 18, "#111111", True, "left")
+d.text(30, 20, 900, 30, "4 · dbt CI/CD — one commit SHA names both the image and the DAG graph", 18, "#111111", True, "left")
 XC = [50 + STEP * i for i in range(5)]
 GW = XC[4] + W + 20 - 30
 d.group(30, 70, GW, 130, "Pull request", "ci")
@@ -272,7 +355,7 @@ d.save("dbt-cicd.drawio")
 
 # ---------------------------------------------------------------- 4. Airflow CI/CD
 d = D("Airflow CI/CD")
-d.text(30, 20, 900, 30, "4 · Airflow CI/CD — the image is promoted, DAGs are pulled", 18, "#111111", True, "left")
+d.text(30, 20, 900, 30, "5 · Airflow CI/CD — the image is promoted, DAGs are pulled", 18, "#111111", True, "left")
 XA = [50 + STEP * i for i in range(4)]
 GW = XA[3] + W + 20 - 30
 CX = 30 + GW + 20
