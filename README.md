@@ -83,4 +83,3 @@ The numbers on the diagram match the sections below.
 
 - [apache/airflow#73517](https://github.com/apache/airflow/pull/73517) — Stream S3 remote task logs (peak heap 1,169 → 30 MiB)
 - [astronomer/astronomer-cosmos#2815](https://github.com/astronomer/astronomer-cosmos/pull/2815) — Atomic writes for the dbt partial-parse cache
-- [datahub-project/datahub#5918](https://github.com/datahub-project/datahub/issues/5918) — Tableau ingestion bug report
