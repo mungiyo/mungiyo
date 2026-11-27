@@ -192,7 +192,7 @@ d.node(X[1], 626, "CI/CD", "GitHub Actions → ECR · S3 → ArgoCD · git-sync"
 d.icon(X[1] + 44, 639, "gha")
 d.icon(X[1] + 78, 639, "argo")
 d.badge(X[3] - 10, 210, 1)
-d.badge(X[1] - 10, 90, 2)
+d.badge(X[4] + W - 14, 210, 2)
 d.badge(X[5] - 10, 330, 3)
 d.badge(X[4] - 10, 330, 4)
 d.badge(X[1] - 10, 550, 5)
@@ -226,7 +226,7 @@ d.save("cdc-pipeline.drawio")
 
 # ---------------------------------------------------------------- 2. Ingestion pipeline
 d = D("Ingestion pipeline")
-d.text(30, 20, 900, 30, "2 · Ingestion pipeline — every batch source lands the same way", 18, "#111111", True, "left")
+d.text(30, 20, 900, 30, "2 · Lakehouse ingestion — every batch source lands the same way", 18, "#111111", True, "left")
 d.text(30, 50, 1000, 18, "Write-Audit-Publish: only batches that pass validation reach Silver · one source = one pipeline instance",
        11, "#555555", False, "left")
 WI, SI = 196, 262
@@ -357,10 +357,10 @@ d.edge(ptr, om, dashed=True, ex=(0.75, 1), en=(0.75, 0))
 d.save("dbt-cicd.drawio")
 
 # ---------------------------------------------------------------- 5. Workflow platform
-d = D("Workflow platform")
-d.text(30, 20, 1000, 30, "5 · Workflow platform — many ways in, one Airflow runtime", 18, "#111111", True, "left")
-d.text(30, 50, 1240, 18, "Engineers, a self-service portal and dbt all create workflows; "
-       "the platform layer gives every DAG the same policy, secrets, alerts and lineage", 11, "#555555", False, "left")
+d = D("Airflow-based workflow platform")
+d.text(30, 20, 1000, 30, "5 · Airflow-based workflow platform — many ways in, one runtime", 18, "#111111", True, "left")
+d.text(30, 50, 1240, 18, "Workflows arrive as code, as specs or from dbt; "
+       "the platform layer gives every DAG the same policy, resources, secrets, alerts and lineage", 11, "#555555", False, "left")
 WP = 210
 AX, BX = 30, 290
 C1, C2 = 555, 790
@@ -371,30 +371,30 @@ d.group(BX - 14, GT, WP + 28, GH, "Delivery", "orch")
 crt = d.group(C1 - 15, GT, C2 + WP + 15 - (C1 - 15), GH, "Runtime · Airflow 3 on Kubernetes", "lake")
 drun = d.group(DX - 14, GT, WP + 28, GH, "Tasks run on", "proc")
 rows = [120, 215, 310, 405, 500]
-pr = d.node(AX, rows[0] + 7, "DAG pull request", "hand-written DAGs\ndomain packages", "plain", w=WP, h=70, icon="github")
-portal = d.node(AX, rows[1] + 7, "Self-service portal", "sheet export / import specs\none DAG per spec, paused", "plain", w=WP, h=70)
+pr = d.node(AX, rows[0] + 7, "DAG pull request", "hand-written DAGs\nreviewed · tested in CI", "plain", w=WP, h=70, icon="github")
+portal = d.node(AX, rows[1] + 7, "Spec-driven DAGs", "a UI or service writes a spec\none DAG per spec", "plain", w=WP, h=70)
 dbtm = d.node(AX, rows[2] + 7, "dbt project", "one DAG file per unit\ngraph from the manifest", "plain", w=WP, h=70, icon="dbt")
 ppr = d.node(AX, rows[3] + 7, "Platform pull request", "image · config · plugins", "plain", w=WP, h=70, icon="github")
 gsync = d.node(BX, rows[0] + 7, "git-sync sidecar", "main → every pod\nin about a minute", "proc", w=WP, h=70, icon="git")
-s3 = d.node(BX, rows[1] + 7, "S3", "specs · dbt manifest\nread at parse time", "plain", w=WP, h=70, icon="aws")
-rel = d.node(BX, rows[3] + 7, "Image release", "release-please → ECR\nGitOps tag → ArgoCD", "orch", w=WP, h=70, icon="argo")
-ctrl = d.node(C1, 113, "Control plane", "Scheduler · DAG processor\nTriggerer · API server\nOkta SSO · dev / stg / prod",
+s3 = d.node(BX, rows[1] + 7, "Object storage", "specs · dbt manifest\nread at parse time", "plain", w=WP, h=70, icon="aws")
+rel = d.node(BX, rows[3] + 7, "Image release", "versioned image → registry\nGitOps tag → ArgoCD", "orch", w=WP, h=70, icon="argo")
+ctrl = d.node(C1, 113, "Control plane", "Scheduler · DAG processor\nTriggerer · API server\none per environment",
               "orch", w=WP, h=165, icon="airflow")
-kx = d.node(C2, rows[0] + 7, "Kubernetes executor", "one pod per task\nimage set by policy", "plain", w=WP, h=70, icon="k8s")
-cel = d.node(C2, rows[1] + 7, "Celery workers", "KEDA 0–4\ndeferrable dbt sensors", "plain", w=WP, h=70)
+kx = d.node(C2, rows[0] + 7, "Kubernetes executor", "one pod per task\nisolation for heavy tasks", "plain", w=WP, h=70, icon="k8s")
+cel = d.node(C2, rows[1] + 7, "Celery workers", "always warm · autoscaled\nno pod start for short tasks", "plain", w=WP, h=70)
 d.group(C1 - 7, 300, C2 + WP + 7 - (C1 - 7), 280, "Platform layer — every DAG gets it", "plain")
-pol = d.node(C1, 340, "Cluster policy", "timeouts · env tags · pools\nSlack failure callback", "orch", w=WP, h=70, icon="airflow")
-ops = d.node(C2, 340, "Shared operators", "Spark Connect · Databricks\n→ Postgres · SaaS APIs", "orch", w=WP, h=70, icon="spark")
-sec = d.node(C1, 430, "Secrets", "SSM Parameter Store\nconnections · variables", "plain", w=WP, h=70, icon="aws")
-xcl = d.node(C2, 430, "XCom & task logs", "both on S3\nstreaming log reader", "plain", w=WP, h=70, icon="aws")
-pls = d.node(C1, 520, "Pools", "per-source concurrency\nlimits", "plain", w=WP, h=70)
+pol = d.node(C1, 340, "Cluster policy", "timeouts · tags · pools\nfailure callbacks", "orch", w=WP, h=70, icon="airflow")
+plc = d.node(C2, 340, "Placement policy", "executor · CPU · memory per task\nset from measured usage", "orch", w=WP, h=70, icon="airflow")
+sec = d.node(C1, 430, "Secrets", "external secret store\nconnections · variables", "plain", w=WP, h=70, icon="aws")
+xcl = d.node(C2, 430, "XCom & task logs", "both on object storage\nstreaming log reader", "plain", w=WP, h=70, icon="aws")
+ops = d.node(C1, 520, "Shared operators", "hooks · operators · helpers\nshipped with the DAGs", "plain", w=WP, h=70)
 ast = d.node(C2, 520, "Assets", "one per table\ndata-aware schedules", "plain", w=WP, h=70)
 run = [
-    ("Databricks SQL", "warehouse · dbt sources", "databricks"),
-    ("Spark Connect", "shared Spark server", "spark"),
-    ("Kubernetes pods", "dbt · OpenMetadata ingestion", "k8s"),
-    ("PostgreSQL", "feature store sync", "postgres"),
-    ("SaaS · Google", "Sheets · BigQuery · ad APIs", None),
+    ("SQL warehouse", "queries · dbt models", "databricks"),
+    ("Spark", "shared Spark Connect server", "spark"),
+    ("Kubernetes pods", "dbt · containerised jobs", "k8s"),
+    ("Databases", "loads · syncs", "postgres"),
+    ("External APIs", "3rd-party systems", None),
 ]
 for y, (t, sub, ic) in zip(rows, run):
     d.node(DX, y + 7, t, sub, "plain", w=WP, h=70, icon=ic)
@@ -411,11 +411,72 @@ d.edge(crt, drun, "tasks", ex=R, en=L)
 d.group(16, 610, DX + WP + 14 - 16, 100, "Observe & govern", "plain")
 OW = (DX + WP - 30 - 60) / 4
 obs = [
-    ("Okta SSO", "FAB roles from Okta groups", None),
-    ("Slack alerts", "failures · dbt test warnings", "slack"),
-    ("OpenMetadata lineage", "Assets · specs → DAG lineage", "om"),
-    ("dbt Docs", "served by the API server", "dbt"),
+    ("SSO · RBAC", "roles from identity groups", None),
+    ("Alerts", "task failures · data test warnings", "slack"),
+    ("Task metrics", "memory · CPU · queue wait per task", None),
+    ("Lineage", "Assets → metadata catalog", "om"),
 ]
 for i, (t, sub, ic) in enumerate(obs):
     d.node(30 + i * (OW + 20), 644, t, sub, "plain", w=OW, h=52, icon=ic)
 d.save("workflow-platform.drawio")
+
+# ---------------------------------------------------------------- 2. Lakehouse
+d = D("Lakehouse on Databricks")
+d.text(30, 20, 1000, 30, "2 · Lakehouse on Databricks — one copy of the data, several engines", 18, "#111111", True, "left")
+d.text(30, 50, 1240, 18, "Open table formats on object storage, governed by Unity Catalog · "
+       "each step runs on the engine that fits it", 11, "#555555", False, "left")
+GB = 418
+d.group(XI[0] - 14, 84, WI + 28, GB - 84, "Ingest", "ingest")
+d.group(XI[1] - 14, 84, XI[3] + WI + 28 - XI[1], GB - 84, "Storage — Delta · Iceberg tables in Unity Catalog, files on S3", "lake")
+d.group(XI[4] - 14, 84, WI + 28, GB - 84, "Serve", "serve")
+RY = [129, 229, 329]
+cdc = d.node(XI[0], RY[0], "CDC", "Kafka → Spark MERGE\nservice DB replicas", "ingest", w=WI, h=70, icon="kafka")
+evt = d.node(XI[0], RY[1], "Events", "Kafka Connect Iceberg sink\nappend-only", "ingest", w=WI, h=70, icon="kafka")
+bat = d.node(XI[0], RY[2], "Batch sources", "APIs · files → S3 landing\n→ Auto Loader", "ingest", w=WI, h=70, icon="aws")
+raw = d.node(XI[1], RY[0], "Raw", "source replicas · events\nBronze → Silver", "lake", w=WI, h=70, icon="databricks")
+core = d.node(XI[2], RY[0], "Core", "dbt staging → core\nfacts · dimensions", "lake", w=WI, h=70, icon="dbt")
+mart = d.node(XI[3], RY[0], "Mart", "dbt marts\nshaped for one use", "lake", w=WI, h=70, icon="dbt")
+NY2, NH2 = 212, 190
+d.note(XI[1], NY2, WI, NH2, [
+    ("How it is written", ["• CDC: MERGE by key every 10 min", "• Events: append-only commits", "• Batch: stage → check → publish",
+                           "  (Write-Audit-Publish)"]),
+    ("Rules", ["• Bronze stays private —", "  only Silver is granted", "• Schema changes are applied", "  by the job and announced"])])
+d.note(XI[2], NY2, WI, NH2, [
+    ("Modelling", ["• staging: rename · cast · clean", "• core: Kimball facts and", "  dimensions, shared by all marts"]),
+    ("Runs", ["• One image per commit runs dbt", "• Tests and source freshness", "  gate every run",
+              "• Slim CI builds only what a", "  pull request changed"])])
+d.note(XI[3], NY2, WI, NH2, [
+    ("Shape", ["• Wide tables for one consumer:", "  a dashboard, a report, a", "  feature set"]),
+    ("Contract", ["• Owner and exposure declared", "  next to the model", "• Consumers read marts,", "  never staging"])])
+dash = d.node(XI[4], RY[0], "Dashboards · SQL", "BI dashboards\nad-hoc analysis", "serve", w=WI, h=70, icon="databricks")
+feat = d.node(XI[4], RY[1], "Feature store", "changed rows → online store\n→ lookup API", "serve", w=WI, h=70, icon="postgres")
+expo = d.node(XI[4], RY[2], "Exports", "scheduled extracts\nto spreadsheets · tools", "serve", w=WI, h=70)
+d.edge(cdc, raw, ex=R, en=L)
+d.edge(evt, raw, ex=R, en=(0, 0.72), pts=[(XI[1] - 30, RY[1] + 28), (XI[1] - 30, RY[0] + 43)])
+d.edge(bat, raw, ex=R, en=(0, 0.92), pts=[(XI[1] - 40, RY[2] + 28), (XI[1] - 40, RY[0] + 57)])
+d.edge(raw, core, "dbt", ex=R, en=L)
+d.edge(core, mart, "dbt", ex=R, en=L)
+d.edge(mart, dash, ex=R, en=L)
+d.edge(mart, feat, ex=(1, 0.72), en=L, pts=[(XI[4] - 30, RY[0] + 43), (XI[4] - 30, RY[1] + 28)])
+d.edge(mart, expo, ex=(1, 0.92), en=L, pts=[(XI[4] - 40, RY[0] + 57), (XI[4] - 40, RY[2] + 28)])
+GX1 = XI[4] + WI
+QW = (GX1 - 30 - 60) / 4
+d.group(16, 438, GX1 - 2, 100, "Compute engines — the same tables, the engine that fits the step", "proc")
+eng = [
+    ("Spark on Kubernetes", "CDC merge · snapshots\nopen-source Spark, Spark Connect", "spark"),
+    ("Kafka Connect", "event sink\nno cluster to schedule", "kafka"),
+    ("Databricks jobs", "Auto Loader · notebooks\nstarted per run", "databricks"),
+    ("SQL warehouse", "dbt models · dashboards\nad-hoc SQL", "databricks"),
+]
+for i, (t, sub, ic) in enumerate(eng):
+    d.node(30 + i * (QW + 20), 479, t, sub, "proc", w=QW, h=70, icon=ic)
+d.group(16, 558, GX1 - 2, 100, "Around it", "plain")
+aro = [
+    ("Orchestration — Airflow", "schedules every step", "orch", "airflow"),
+    ("Governance — Unity Catalog", "grants by layer · as Terraform", "lake", "databricks"),
+    ("Quality", "dbt tests · freshness · WAP checks", "plain", "dbt"),
+    ("Catalog — OpenMetadata", "descriptions · lineage", "plain", "om"),
+]
+for i, (t, sub, k, ic) in enumerate(aro):
+    d.node(30 + i * (QW + 20), 592, t, sub, k, w=QW, h=52, icon=ic)
+d.save("lakehouse.drawio")
