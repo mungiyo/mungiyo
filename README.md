@@ -83,12 +83,12 @@
 
 ## Tech Stack
 
-- **수집** — Kafka Connect 위의 Debezium CDC, 커스텀 SMT, Iceberg sink
-- **처리** — Spark (Spark Connect on Kubernetes), Flink, dbt
-- **오케스트레이션** — Airflow 3 on Kubernetes, Cosmos 로 dbt 실행
+- **Ingestion** — Debezium CDC on Kafka Connect, custom SMTs, Iceberg sink
+- **Processing** — Spark (Spark Connect on Kubernetes), Flink, dbt
+- **Orchestration** — Airflow 3 on Kubernetes, dbt on Cosmos
 - **Lakehouse** — Databricks (Delta, Iceberg, Unity Catalog), SQL warehouse, Auto Loader
-- **서빙** — PostgreSQL 기반 피처 스토어, 대시보드
-- **플랫폼** — Kubernetes, ArgoCD, Terraform, OpenMetadata
+- **Serving** — feature store on PostgreSQL, dashboards
+- **Platform** — Kubernetes, ArgoCD, Terraform, OpenMetadata
 
 ## 오픈소스 기여
 
